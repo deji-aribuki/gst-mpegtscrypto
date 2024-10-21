@@ -1,0 +1,53 @@
+cmake_minimum_required(VERSION 3.10)
+project(mpegtscrypto C)
+
+# Find GStreamer dependencies
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GST REQUIRED gstreamer-1.0)
+pkg_check_modules(GST_BASE REQUIRED gstreamer-base-1.0)
+pkg_check_modules(GST_PBUTILS REQUIRED gstreamer-pbutils-1.0)
+
+# Find OpenSSL
+find_package(OpenSSL REQUIRED)
+
+# Find libdvbcsa
+find_package(PkgConfig)
+pkg_check_modules(LIBDVBCSA REQUIRED libdvbcsa)
+
+# If libdvbcsa is found, define a macro for usage in code
+if (LIBDVBCSA_FOUND)
+  add_definitions(-DHAVE_LIBDVBCSA)
+endif()
+
+# Source files
+set(SOURCES
+  gstmpegtscrypto.c
+  gstmpegtspacketizer.c
+  gstmpegtscipher.c
+)
+
+# Build the plugin
+add_library(gstmpegtscrypto SHARED ${SOURCES})
+
+# Link against GStreamer, OpenSSL, and libdvbcsa
+target_link_libraries(gstmpegtscrypto
+  ${GST_LIBRARIES}
+  ${GST_BASE_LIBRARIES}
+  ${GST_PBUTILS_LIBRARIES}
+  OpenSSL::SSL
+  OpenSSL::Crypto
+  ${LIBDVBCSA_LIBRARIES}
+)
+
+# Include directories
+target_include_directories(gstmpegtscrypto PRIVATE
+  ${GST_INCLUDE_DIRS}
+  ${GST_BASE_INCLUDE_DIRS}
+  ${GST_PBUTILS_INCLUDE_DIRS}
+  ${LIBDVBCSA_INCLUDE_DIRS}
+)
+
+# Install the plugin
+install(TARGETS gstmpegtscrypto
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/gstreamer-1.0
+)
