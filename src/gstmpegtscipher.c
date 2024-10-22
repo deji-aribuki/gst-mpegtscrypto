@@ -1470,9 +1470,8 @@ int tdes_ecb_decrypt(MpegTSCryptoCipher *c, uint8_t* in, int len,
 
 #ifdef HAVE_LIBDVBCSA
 int dvb_csa_encrypt(MpegTSCryptoCipher *c, uint8_t *in,
-		int len, uint8_t *out, int key_size)
+		int len, uint8_t *out, G_GNUC_UNUSED int key_size)
 {
-#ifndef CSA_DISABLE
     /* allocate dvb csa key */
     struct dvbcsa_key_s *csa_key = dvbcsa_key_alloc();
 
@@ -1492,15 +1491,11 @@ int dvb_csa_encrypt(MpegTSCryptoCipher *c, uint8_t *in,
     dvbcsa_key_free(csa_key);
 
     return len;
-#else
-    return 0;
-#endif
 }
 
 int dvb_csa_decrypt(MpegTSCryptoCipher *c, uint8_t *in, int len,
-		uint8_t *out, int key_size)
+		uint8_t *out, G_GNUC_UNUSED int key_size)
 {
-#ifndef CSA_DISABLE
     /* allocate dvb csa key */
     struct dvbcsa_key_s *csa_key = dvbcsa_key_alloc();
 
@@ -1520,12 +1515,9 @@ int dvb_csa_decrypt(MpegTSCryptoCipher *c, uint8_t *in, int len,
     dvbcsa_key_free(csa_key);
 
     return len;
-#else
-    return 0;
-#endif
 }
 
-#ifndef CSA3_DISABLE
+#ifdef CSA3_ENABLE
 
 #define CSA3_CW_SIZE 16
 #define byte uint8_t
@@ -1535,15 +1527,28 @@ extern void CSA3_decrypt(byte pt[], const byte ct[], int len,
              const byte cw[CSA3_CW_SIZE]);
 
 int dvb_csa3_encrypt(MpegTSCryptoCipher *c, uint8_t *in, int len,
-			uint8_t *out, int key_size) {
+			uint8_t *out, G_GNUC_UNUSED int key_size) {
     CSA3_encrypt(out, in, len, c->KEY);
     return len;
 }
 
 int dvb_csa3_decrypt(MpegTSCryptoCipher *c, uint8_t *in, int len,
-		uint8_t *out, int key_size) {
+		uint8_t *out, G_GNUC_UNUSED int key_size) {
     CSA3_decrypt(out, in, len, c->KEY);
     return len;
+}
+#else
+int dvb_csa3_encrypt(G_GNUC_UNUSED MpegTSCryptoCipher *c,
+            G_GNUC_UNUSED uint8_t *in, G_GNUC_UNUSED int len,
+            G_GNUC_UNUSED uint8_t *out, G_GNUC_UNUSED int key_size) {
+
+    return 0;
+}
+
+int dvb_csa3_decrypt(G_GNUC_UNUSED MpegTSCryptoCipher *c,
+        G_GNUC_UNUSED uint8_t *in, G_GNUC_UNUSED int len,
+        G_GNUC_UNUSED uint8_t *out, G_GNUC_UNUSED int key_size) {
+    return 0;
 }
 #endif
 

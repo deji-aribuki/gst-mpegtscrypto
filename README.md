@@ -24,21 +24,19 @@ Make sure you have the following dependencies installed:
 ```
 sudo apt update
 sudo apt install gstreamer1.0 gstreamer1.0-plugins-base gstreamer1.0-tools \
-                 libssl-dev libcsa-dev meson ninja-build cmake pkg-config
+                 libssl-dev libdvbcsa-dev meson ninja-build cmake pkg-config
 ```
 
 #### On Fedora
 
 ```
 sudo dnf install gstreamer1 gstreamer1-plugins-base openssl-devel \
-                 libcsa-devel meson ninja-build cmake pkg-config
+                 libdvbcsa-devel meson ninja-build cmake pkg-config
 ```
 
 If **libcsa** is not available in your distribution’s package manager, download and compile it from source.
 
 ## Building the Plugin
-
-### Meson and Ninja Build Instructions
 
 1. **Configure the project:**
    ```
@@ -61,34 +59,6 @@ If **libcsa** is not available in your distribution’s package manager, downloa
    ```
 
 4. **Set the `GST_PLUGIN_PATH` environment variable** (if installing locally):
-   ```
-   export GST_PLUGIN_PATH=$HOME/.local/lib/gstreamer-1.0:$GST_PLUGIN_PATH
-   ```
-
-### CMake Build Instructions
-
-1. **Configure the project:**
-   ```
-   mkdir build
-   cd build
-   cmake ..
-   ```
-
-2. **Build the project:**
-   ```
-   make
-   ```
-
-3. **Install the plugin:**
-   ```
-   sudo make install
-   ```
-   For local installation:
-   ```
-   make install DESTDIR=$HOME/.local
-   ```
-
-4. **Set the `GST_PLUGIN_PATH` environment variable**:
    ```
    export GST_PLUGIN_PATH=$HOME/.local/lib/gstreamer-1.0:$GST_PLUGIN_PATH
    ```

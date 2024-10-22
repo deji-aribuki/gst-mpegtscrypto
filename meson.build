@@ -1,6 +1,8 @@
 project('mpegtscrypto', 'c', version : '1.0',
   default_options : ['warning_level=2'])
 
+cc = meson.get_compiler('c')
+
 # GStreamer dependency
 gst_dep = dependency('gstreamer-1.0')
 gst_base_dep = dependency('gstreamer-base-1.0')
@@ -9,14 +11,16 @@ gst_pbutils_dep = dependency('gstreamer-pbutils-1.0')
 # OpenSSL dependency
 openssl_dep = dependency('openssl', required : true)
 
-# libdvbcsa dependency
-libdvbcsa_dep = dependency('libdvbcsa', required : false, fallback : ['libdvbcsa', 'libdvbcsa_dep'])
-
-# If libdvbcsa is found, define a macro for usage in code
+# dvbcsa dependency
+dvbcsa_dep = dependency('dvbcsa', required : false)
+dvbcsa_dep = dependency('dvbcsa', required : false)
+if not dvbcsa_dep.found()
+  dvbcsa_dep = cc.find_library('dvbcsa')
+endif
 dvbcsa_cflags = []
-#if libdvbcsa_dep.found()
-#  dvbcsa_cflags += ['-DHAVE_LIBDVBCSA']
-#endif
+if dvbcsa_dep.found()
+  dvbcsa_cflags += ['-DHAVE_LIBDVBCSA']
+endif
 
 # This will make the VERSION macro available
 conf = configuration_data()
@@ -43,13 +47,13 @@ gst_plugin = shared_library('gstmpegtscrypto',
   plugin_sources,
   include_directories: inc_dirs,
   install : true,
-  c_args : dvbcsa_cflags,  # Pass the macro definition
+  c_args : dvbcsa_cflags,
   dependencies : [
     gst_dep,
     gst_base_dep,
     gst_pbutils_dep,
     openssl_dep,
-    libdvbcsa_dep,
+    dvbcsa_dep,
   ],
   install_dir : join_paths(get_option('libdir'), 'gstreamer-1.0')
 )

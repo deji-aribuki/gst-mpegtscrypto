@@ -173,12 +173,11 @@ MpegTSCryptoCipherParam cipher_list[] = {
    { "des-cbc-rsb",  8, 8, des_cbc_rsb_encrypt, des_cbc_rsb_decrypt },
    { "des-cbc-scte",  8, 8, des_cbc_scte_encrypt, des_cbc_scte_decrypt },
    { "tdes-ecb",  24, 0, tdes_ecb_encrypt, tdes_ecb_decrypt },
-   //{ "tdes-ecb-cs",  24, 8, tdes_ecb_cs_encrypt,  tdes_ecb_cs_decrypt },
    { "tdes-cbc-rsb",  24, 8, tdes_cbc_rsb_encrypt, tdes_cbc_rsb_decrypt },
    { "tdes-cbc-scte", 24, 8, tdes_cbc_scte_encrypt, tdes_cbc_scte_decrypt },
 #ifdef HAVE_LIBDVBCSA
    { "dvb-csa", 8, 0, dvb_csa_encrypt, dvb_csa_decrypt },
-#ifndef CSA3_DISABLE
+#ifdef CSA3_ENABLE
    { "dvb-csa3", 16, 0, dvb_csa3_encrypt, dvb_csa3_decrypt },
 #endif
 #endif
