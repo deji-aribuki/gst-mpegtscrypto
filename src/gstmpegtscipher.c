@@ -1017,7 +1017,7 @@ static int _des_cbc_scte_rs(uint8_t *in,
     } else if (key_size == 24) {
         cipher = EVP_des_ede3_ecb(); /* triple DES (3-key) */
     } else {
-        //GST_ERROR_OBJECT (c, "invalid key size: %d", key_size);
+        GST_ERROR ("invalid key size: %d", key_size);
         return -1;
     }
 
@@ -1025,7 +1025,7 @@ static int _des_cbc_scte_rs(uint8_t *in,
 
     /* initialize the context for ECB mode */
     if (EVP_EncryptInit_ex(ctx, cipher, NULL, k, NULL) != 1) {
-        //GST_ERROR_OBJECT (c, "EVP_EncryptInit_ex failed");
+        GST_ERROR ("EVP_EncryptInit_ex failed");
         goto err;
     }
 
@@ -1034,7 +1034,7 @@ static int _des_cbc_scte_rs(uint8_t *in,
 
     /* perform ECB encryption */
     if (EVP_EncryptUpdate(ctx, tmp, &out_len1, in, key_size) != 1) {
-        //GST_ERROR_OBJECT (c, "EVP_EncryptUpdate failed");
+        GST_ERROR ("EVP_EncryptUpdate failed");
         goto err;
     }
 
@@ -1210,7 +1210,7 @@ int tdes_cbc_scte_decrypt(MpegTSCryptoCipher *c, uint8_t* in, int len,
     return des_cbc_scte_decrypt(c, in, len, out, key_size);
 }
 
-
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
 int des_ecb_encrypt(MpegTSCryptoCipher *c, uint8_t* in,
 		int len, uint8_t* out, int key_size)
 {
@@ -1328,6 +1328,145 @@ int tdes_ecb_decrypt(MpegTSCryptoCipher *c, uint8_t* in,
 
     return len;
 }
+#else
+int des_ecb_encrypt(MpegTSCryptoCipher *c, uint8_t* in, int len,
+            uint8_t* out, int key_size)
+{
+    EVP_CIPHER_CTX *ctx = NULL;
+    const EVP_CIPHER *cipher = NULL;
+    int out_len1, out_len2;
+    int no_residuals = len % key_size;
+    int no_blocks = len - no_residuals;
+
+    /* select the appropriate DES cipher based on the key size */
+    if (key_size == 8) {
+        cipher = EVP_des_ecb();
+    } else if (key_size == 16) {
+        cipher = EVP_des_ede_ecb();  /* Triple DES (2-key) */
+    } else if (key_size == 24) {
+        cipher = EVP_des_ede3_ecb(); /* Triple DES (3-key) */
+    } else {
+        GST_ERROR_OBJECT (c, "invalid key size: %d", key_size);
+        return -1;
+    }
+
+    /* create and initialize the context */
+    ctx = EVP_CIPHER_CTX_new();
+    if (!ctx) {
+        GST_ERROR_OBJECT (c, "failed to create context");
+        return -1;
+    }
+
+    /* initialize the context for encryption */
+    if (EVP_EncryptInit_ex(ctx, cipher, NULL, c->KEY, c->IV) != 1) {
+        GST_ERROR_OBJECT (c, "EVP_EncryptInit_ex failed");
+        goto err;
+    }
+
+    /* disable padding (as ECB mode can 
+        handle exact block sizes without padding) */
+    EVP_CIPHER_CTX_set_padding(ctx, 0);
+
+    /* perform the encryption */
+    if (EVP_EncryptUpdate(ctx, out, &out_len1, in, len) != 1) {
+        GST_ERROR_OBJECT (c, "EVP_EncryptUpdate failed");
+        goto err;
+    }
+
+    /* finalize encryption (not needed for ECB, but required by the API) */
+    if (EVP_EncryptFinal_ex(ctx, out + out_len1, &out_len2) != 1) {
+        GST_ERROR_OBJECT (c, "EVP_EncryptFinal_ex failed");
+        goto err;
+    }
+
+    /* in case of residuals (data less than block size),
+        copy remaining data as is */
+    memcpy(out + no_blocks, in + no_blocks, no_residuals);
+
+    /* clean up */
+    EVP_CIPHER_CTX_free(ctx);
+    return len;
+
+err:
+    EVP_CIPHER_CTX_free(ctx);
+    return -1;
+}
+
+int des_ecb_decrypt(MpegTSCryptoCipher *c, uint8_t* in, int len,
+            uint8_t* out, int key_size)
+{
+    EVP_CIPHER_CTX *ctx = NULL;
+    const EVP_CIPHER *cipher = NULL;
+    int out_len1, out_len2;
+    int no_residuals = len % key_size;
+    int no_blocks = len - no_residuals;
+
+    /* select the appropriate DES cipher based on the key size */
+    if (key_size == 8) {
+        cipher = EVP_des_ecb();
+    } else if (key_size == 16) {
+        cipher = EVP_des_ede_ecb();  /* Triple DES (2-key) */
+    } else if (key_size == 24) {
+        cipher = EVP_des_ede3_ecb(); /* Triple DES (3-key) */
+    } else {
+        GST_ERROR_OBJECT (c, "invalid key size: %d", key_size);
+        return -1;
+    }
+
+    /* create and initialize the context */
+    ctx = EVP_CIPHER_CTX_new();
+    if (!ctx) {
+        GST_ERROR_OBJECT (c, "failed to create context");
+        return -1;
+    }
+
+    /* initialize the context for encryption */
+    if (EVP_DecryptInit_ex(ctx, cipher, NULL, c->KEY, c->IV) != 1) {
+        GST_ERROR_OBJECT (c, "EVP_DecryptInit_ex failed");
+        goto err;
+    }
+
+    /* disable padding (as ECB mode can 
+        handle exact block sizes without padding) */
+    EVP_CIPHER_CTX_set_padding(ctx, 0);
+
+    /* perform the encryption */
+    if (EVP_DecryptUpdate(ctx, out, &out_len1, in, len) != 1) {
+        GST_ERROR_OBJECT (c, "EVP_DecryptUpdate failed");
+        goto err;
+    }
+
+    /* finalize encryption (not needed for ECB, but required by the API) */
+    if (EVP_DecryptFinal_ex(ctx, out + out_len1, &out_len2) != 1) {
+        GST_ERROR_OBJECT (c, "EVP_DecryptFinal_ex failed");
+        goto err;
+    }
+
+    /* in case of residuals (data less than block size),
+        copy remaining data as is */
+    memcpy(out + no_blocks, in + no_blocks, no_residuals);
+
+    /* clean up */
+    EVP_CIPHER_CTX_free(ctx);
+    return len;
+
+err:
+    EVP_CIPHER_CTX_free(ctx);
+    return -1;
+}
+
+int tdes_ecb_encrypt(MpegTSCryptoCipher *c, uint8_t* in, int len,
+                uint8_t* out, int key_size)
+{
+    return des_ecb_encrypt(c, in, len, out, key_size);
+}
+
+int tdes_ecb_decrypt(MpegTSCryptoCipher *c, uint8_t* in, int len,
+        uint8_t* out, int key_size)
+{
+    return des_ecb_decrypt(c, in, len, out, key_size);
+}
+#endif
 
 #ifdef HAVE_LIBDVBCSA
 int dvb_csa_encrypt(MpegTSCryptoCipher *c, uint8_t *in,
