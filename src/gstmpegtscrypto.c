@@ -537,7 +537,7 @@ mpegtscrypto_start (GstBaseTransform * base)
   } else if (g_str_has_suffix(name, "mpegtsdecrypt")) {
     filter->mode = MPEGTSCRYPTO_MODE_DECRYPT;
   } else {
-    GST_ERROR("Unknown element name: %s", name);
+    g_assert_not_reached ();
     return FALSE;
   }
 

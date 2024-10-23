@@ -38,17 +38,13 @@ If **libcsa** is not available in your distribution’s package manager, downloa
 
 ## Building the Plugin
 
-1. **Configure the project:**
+1. **Configure and build:**
    ```
    meson build
-   ```
-
-2. **Build the project:**
-   ```
    ninja -C build
    ```
 
-3. **Install the plugin system-wide:**
+3. **Installation:**
    ```
    sudo ninja -C build install
    ```
@@ -56,10 +52,6 @@ If **libcsa** is not available in your distribution’s package manager, downloa
    ```
    meson build --prefix=$HOME/.local
    ninja -C build install
-   ```
-
-4. **Set the `GST_PLUGIN_PATH` environment variable** (if installing locally):
-   ```
    export GST_PLUGIN_PATH=$HOME/.local/lib/gstreamer-1.0:$GST_PLUGIN_PATH
    ```
 
