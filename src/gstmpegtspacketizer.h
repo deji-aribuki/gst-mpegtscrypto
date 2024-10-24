@@ -4,7 +4,7 @@
  * 
  * Authors:
  *   Alessandro Decina <alessandro@nnva.org>
- *   Deji Aribuki <deji.aribuki@ketulabs.ch>, <deji.aribuki@gmail.com> 
+ *   Deji Aribuki <daribuki@ketulabs.ch>, <deji.aribuki@gmail.com> 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public

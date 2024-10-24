@@ -1,0 +1,34 @@
+
+NOTICE
+
+GStreamer MPEG-TS Crypto Plugin (mpegtscrypto)
+Version 1.0
+Copyright (C) 2024 ketulabs.ch
+Licensed under the GNU Lesser General Public License (LGPL) v2.1
+For more information, see the LICENSE file.
+
+Third-Party Licenses and Attributions
+
+This project includes third-party libraries that are subject to the following licenses and terms:
+
+GStreamer
+- License: GNU Lesser General Public License (LGPL) v2.1
+- Copyright: 1999-2024 GStreamer Developers
+- Source: https://gstreamer.freedesktop.org/
+
+OpenSSL
+- License: OpenSSL License (Apache-style license)
+- Copyright: The OpenSSL Project
+- Source: https://www.openssl.org/
+
+OpenSSL is dual-licensed under the OpenSSL License and the SSLeay License. This project incorporates OpenSSL for cryptographic functionality.
+
+libcsa (Optional Dependency)
+- License: GNU General Public License (GPL) v2 or later
+- Copyright: DVBCSA Developers
+- Source: https://www.videolan.org/developers/libdvbcsa.html
+
+libcsa is used for DVB-CSA encryption/decryption (optional). This library is licensed under the GPL, which means any distribution involving it may need to comply with the terms of the GPL license.
+
+Acknowledgements
+This project incorporates or depends on software developed by open-source communities, including the GStreamer project, OpenSSL project, and VideoLAN (for libcsa). Special thanks to these communities for their contributions to free and open-source software.
